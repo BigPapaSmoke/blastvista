@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Video;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+class VideoController extends Controller
+{
+public function play($filename)
+    {
+        \Log::info('Play route called for filename: "' . $filename . '"');
+        
+        $decodedFilename = urldecode($filename);
+        \Log::info('Decoded filename: "' . $decodedFilename . '"');
+        
+        $path = 'videos/' . $decodedFilename;
+        $fullPath = Storage::disk('public')->path($path);
+        \Log::info('Checking file at path: "' . $fullPath . '"');
+        
+        if (!Storage::disk('public')->exists($path)) {
+            \Log::error('Video file not found in storage: "' . $fullPath . '"');
+            abort(404, 'The video file could not be found.');
+        }
+        \Log::info('Video file exists in storage: "' . $fullPath . '"');
+
+        $mimeType = \Illuminate\Support\Facades\File::mimeType($fullPath);
+        \Log::info('MIME type for video: "' . $mimeType . '"');
+        
+        $fileSize = Storage::disk('public')->size($path);
+        \Log::info('Video file size: ' . $fileSize . ' bytes');
+
+        return response()->file($fullPath, [
+            'Content-Type' => 'video/mp4',
+            'Content-Length' => $fileSize,
+            'Content-Disposition' => 'inline; filename="' . $decodedFilename . '"',
+            'Accept-Ranges' => 'bytes',
+        ]);
+    }
+
+public function handleBarcodeInput(Request $request)
+    {
+        $rawBarcode = $request->input('barcode');
+        $barcode = trim(preg_replace('/[\r\n]+/', '', $rawBarcode));
+        \Log::info('Raw barcode input: "' . $rawBarcode . '"');
+        \Log::info('Trimmed barcode: "' . $barcode . '"');
+
+        $video = Video::where('barcode', $barcode)->first();
+        if (!$video) {
+            \Log::error('No video found for barcode: "' . $barcode . '"');
+            // Log all barcodes for debugging
+            $allBarcodes = Video::pluck('barcode', 'filename')->toArray();
+            \Log::info('Available barcodes in database: ' . json_encode($allBarcodes));
+            return redirect()->back()->withErrors(['barcode' => 'No video found for barcode: ' . $barcode]);
+        }
+
+        \Log::info('Found video: ' . json_encode($video));
+        \Log::info('Rendering welcome view with video: ' . $video->filename);
+        return view('welcome', ['video' => $video]);
+    }
+
+    public function upload()
+    {
+        return view('upload');
+    }
+
+    public function handleUpload(Request $request)
+    {
+        // Placeholder for upload logic
+        return redirect()->back()->with('message', 'Upload not implemented.');
+    }
+
+    public function delete(Request $request)
+    {
+        // Placeholder for delete logic
+        return redirect()->back()->with('message', 'Delete not implemented.');
+    }
+}
