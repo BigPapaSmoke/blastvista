@@ -1,15 +1,16 @@
 <x-filament::page>
     <h2 class="text-2xl font-bold mb-4">Favorite Videos Player</h2>
     <div id="video-player" style="position: relative;">
-        <video id="video-element" width="1920" height="1080" controls autoplay playsinline muted>
+        <video id="video-element" width="1920" height="1080" controls autoplay playsinline>
             <source id="video-source" src="{{ asset('storage/videos/' . $videos->first()->filename) }}" type="video/mp4">
             Your browser does not support the video tag.
         </video>
         <!-- Barcode Input Resized -->
-   <input type="text"
-       id="barcodeInput"
-       placeholder="Scan here"
-       style="position: absolute; bottom: 100px; left: 20px; z-index: 1000; background: white; border: 1px solid black; padding: 5px; width: 100px;">
+        <input type="text"
+            id="barcodeInput"
+            placeholder="Scan here"
+            autocomplete="off"
+            style="position: absolute; bottom: 32px; left: 32px; z-index: 1000; background: rgba(255, 255, 255, 0.9); border: 2px solid #000; padding: 8px 12px; width: 260px; font-size: 22px; border-radius: 6px;">
 </div>
 
 
@@ -28,7 +29,29 @@
                 return;
             }
 
-            let currentIndex = 0;
+            function requestFullscreen(element) {
+                if (!element) {
+                    return Promise.reject(new Error('Element missing for fullscreen request'));
+                }
+                const request = element.requestFullscreen || element.webkitRequestFullscreen || element.mozRequestFullScreen || element.msRequestFullscreen;
+                if (request) {
+                    return request.call(element);
+                }
+                return Promise.reject(new Error('Fullscreen API not supported'));
+            }
+
+            function attemptPlayback() {
+                if (!videoElement) {
+                    return Promise.resolve();
+                }
+                videoElement.muted = false;
+                videoElement.volume = 1;
+                return videoElement.play().catch(function(error) {
+                    console.warn('[Video] Playback blocked, awaiting user action:', error);
+                });
+            }
+
+            attemptPlayback();
 
             // Handle video looping - restart same video
             videoElement.addEventListener('ended', function () {
@@ -40,33 +63,37 @@
             });
 
             // Toggle full-screen mode and ensure barcodeInput stays visible
+            videoPlayer.style.cursor = 'pointer';
             videoPlayer.addEventListener('click', function() {
-                if (videoPlayer.requestFullscreen) {
-                    videoPlayer.requestFullscreen();
-                } else if (videoPlayer.webkitRequestFullscreen) {
-                    videoPlayer.webkitRequestFullscreen();
-                } else if (videoPlayer.mozRequestFullScreen) {
-                    videoPlayer.mozRequestFullScreen();
-                } else if (videoPlayer.msRequestFullscreen) {
-                    videoPlayer.msRequestFullscreen();
-                }
+                const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+                const fullscreenPromise = isFullscreen ? Promise.resolve() : requestFullscreen(videoPlayer).catch(function(error) {
+                    console.warn('[Video] Fullscreen request failed:', error);
+                });
+
+                fullscreenPromise.finally(function() {
+                    attemptPlayback().finally(function() {
+                        barcodeInput.focus({ preventScroll: true });
+                    });
+                });
             });
 
             // Adjust barcodeInput styling during full-screen mode
             function handleFullscreenChange() {
                 if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
                     barcodeInput.style.position = 'fixed';
-                    barcodeInput.style.bottom = '100px'; // Adjusted position
-                    barcodeInput.style.left = '20px';
+                    barcodeInput.style.bottom = '48px';
+                    barcodeInput.style.left = '48px';
                     barcodeInput.style.zIndex = '1000';
-                    barcodeInput.focus(); // Auto-focus during full-screen
+                    barcodeInput.focus({ preventScroll: true });
                 } else {
                     barcodeInput.style.position = 'absolute';
-                    barcodeInput.style.bottom = '100px';
-                    barcodeInput.style.left = '20px';
-                    barcodeInput.focus(); // Auto-focus after exiting full-screen
+                    barcodeInput.style.bottom = '32px';
+                    barcodeInput.style.left = '32px';
+                    barcodeInput.focus({ preventScroll: true });
                 }
             }
+
+            handleFullscreenChange();
 
             document.addEventListener('fullscreenchange', handleFullscreenChange);
             document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
@@ -82,10 +109,12 @@
                 } else {
                     console.log('Scanned barcode does not match the specific barcode.');
                 }
+                barcodeInput.value = '';
+                barcodeInput.focus({ preventScroll: true });
             });
 
             // Automatically focus the barcode input field on page load
-            barcodeInput.focus();
+            barcodeInput.focus({ preventScroll: true });
         });
     </script>
 </x-filament::page>
