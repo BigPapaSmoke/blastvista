@@ -91,18 +91,17 @@
 
     <div class="container">
         @if ($videos->isNotEmpty())
-            <video id="video-element" autoplay muted playsinline>
-                <source id="video-source"
-                    src="{{ route('video.play', str_replace(' ', '+', trim($videos->first()->filename))) }}"
-                    type="video/mp4">
+            <video id="video" autoplay muted playsinline>
+                <source id="videoSource"
+                        src="{{ $videos->first()->stream_url }}"
+                        type="video/mp4">
             </video>
         @endif
     </div>
 
-    <form id="barcodeForm" method="POST" action="{{ route('barcode.input') }}">
+    <form id="barcodeForm">
         @csrf
         <input type="text"
-               name="barcode"
                id="barcodeInput"
                placeholder="Scan barcode"
                autofocus>
@@ -110,65 +109,74 @@
 
 <script>
 (function () {
-    document.addEventListener('DOMContentLoaded', function () {
 
-        const videos = {!! json_encode(
-            $videos->pluck('filename')->map(fn($f) =>
-                route('video.play', str_replace(' ', '+', trim($f)))
-            )->toArray()
-        ) !!};
+    const videos = {!! json_encode(
+        $videos->pluck('stream_url')->values()
+    ) !!};
 
-        const video = document.getElementById('video-element');
-        const source = document.getElementById('video-source');
-        const barcodeInput = document.getElementById('barcodeInput');
-        const barcodeForm = document.getElementById('barcodeForm');
+    const video = document.getElementById('video');
+    const source = document.getElementById('videoSource');
+    const barcodeInput = document.getElementById('barcodeInput');
 
-        let currentIndex = 0;
+    let currentIndex = 0;
 
-        function stopVideoImmediately() {
-            if (!video) return;
-            video.pause();
-            video.currentTime = 0;
-            video.removeAttribute('src');
-            video.load();
-        }
+    function playIdleVideo(index) {
+        source.src = videos[index];
+        video.load();
+        video.play().catch(() => {});
+    }
 
-        function playNextIdleVideo() {
-            if (!videos.length) return;
-            currentIndex = (currentIndex + 1) % videos.length;
-            source.src = videos[currentIndex];
-            video.load();
-            video.play().catch(() => {});
-        }
+    function playNextIdleVideo() {
+        currentIndex = (currentIndex + 1) % videos.length;
+        playIdleVideo(currentIndex);
+    }
 
-        if (video) {
-            video.addEventListener('ended', playNextIdleVideo);
-            video.play().catch(() => {});
-        }
+    function playVideoImmediately(url) {
+        video.pause();
+        video.currentTime = 0;
 
-        barcodeInput.addEventListener('change', function () {
-            const barcode = barcodeInput.value.trim();
-            if (!barcode) return;
+        source.src = url;
+        video.load();
 
-            stopVideoImmediately();
-            video.muted = false;
+        video.muted = false;
+        video.play().catch(() => {});
+    }
 
-            setTimeout(() => {
-                barcodeForm.submit();
-            }, 50);
-        });
+    if (video) {
+        video.addEventListener('ended', playNextIdleVideo);
+        video.play().catch(() => {});
+    }
 
-        function enterFullscreenOnce() {
-            const el = document.documentElement;
-            if (!document.fullscreenElement) {
-                if (el.requestFullscreen) el.requestFullscreen();
-                else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    barcodeInput.addEventListener('change', function () {
+        const barcode = barcodeInput.value.trim();
+        if (!barcode) return;
+
+        fetch('{{ route('barcode.input') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+            },
+            body: JSON.stringify({ barcode })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.video_url) {
+                playVideoImmediately(data.video_url);
             }
-        }
+        })
+        .catch(() => {});
 
-        setTimeout(enterFullscreenOnce, 500);
-
+        barcodeInput.value = '';
     });
+
+    // Fullscreen once
+    setTimeout(() => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen?.();
+        }
+    }, 500);
+
 })();
 </script>
 
