@@ -49,6 +49,32 @@
             justify-content: center;
         }
 
+        .scanner-panel {
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            width: min(760px, calc(100vw - 24px));
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.68);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .scanner-label {
+            color: #fff;
+            font-size: clamp(14px, 2vw, 20px);
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
         video {
             width: 100vw;
             height: 100vh;
@@ -57,26 +83,49 @@
         }
 
         form {
-            position: fixed;
-            bottom: 5vh;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
+            width: 100%;
         }
 
         input[type="text"] {
-            width: min(600px, 90vw);
-            padding: 14px;
-            font-size: clamp(20px, 3vw, 36px);
-            border-radius: 6px;
-            border: none;
-            background: rgba(0,0,0,0.7);
+            width: 100%;
+            padding: 16px 18px;
+            font-size: clamp(22px, 3vw, 34px);
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.45);
+            background: rgba(20,20,20,0.9);
             color: #fff;
             text-align: center;
+            box-sizing: border-box;
         }
 
         input[type="text"]:focus {
             outline: none;
+            border-color: #7dd3fc;
+            box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.18);
+        }
+
+        #scanStatus {
+            width: 100%;
+            color: #fff;
+            font-size: clamp(15px, 2vw, 20px);
+            background: rgba(255, 255, 255, 0.12);
+            padding: 10px 12px;
+            border-radius: 10px;
+            min-height: 24px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 640px) {
+            .logo {
+                width: 56px;
+                height: 56px;
+            }
+
+            .logo-top-left,
+            .logo-top-right {
+                top: 90px;
+            }
         }
     </style>
 </head>
@@ -99,13 +148,22 @@
         @endif
     </div>
 
-    <form id="barcodeForm">
-        @csrf
-        <input type="text"
-               id="barcodeInput"
-               placeholder="Scan barcode"
-               autofocus>
-    </form>
+    <div class="scanner-panel">
+        <div class="scanner-label">Scan Product Barcode</div>
+        <form id="barcodeForm">
+            @csrf
+            <input type="text"
+                   id="barcodeInput"
+                   placeholder="Scan barcode here"
+                   inputmode="numeric"
+                   autocomplete="off"
+                   autofocus>
+        </form>
+
+        <div id="scanStatus">
+            Ready to scan
+        </div>
+    </div>
 
 <script>
 (function () {
@@ -114,11 +172,17 @@
         $videos->pluck('stream_url')->values()
     ) !!};
 
+    const barcodeForm = document.getElementById('barcodeForm');
     const video = document.getElementById('video');
     const source = document.getElementById('videoSource');
     const barcodeInput = document.getElementById('barcodeInput');
+    const scanStatus = document.getElementById('scanStatus');
 
     let currentIndex = 0;
+    let scanTimeout = null;
+    let isSubmittingBarcode = false;
+    let scannerBuffer = '';
+    let scannerBufferTimeout = null;
 
     function playIdleVideo(index) {
         source.src = videos[index];
@@ -142,14 +206,24 @@
         video.play().catch(() => {});
     }
 
-    if (video) {
-        video.addEventListener('ended', playNextIdleVideo);
-        video.play().catch(() => {});
+    function focusBarcodeInput() {
+        barcodeInput.focus({ preventScroll: true });
     }
 
-    barcodeInput.addEventListener('change', function () {
-        const barcode = barcodeInput.value.trim();
-        if (!barcode) return;
+    function setScanStatus(message) {
+        scanStatus.textContent = message;
+    }
+
+    function submitBarcode() {
+        const barcode = barcodeInput.value.replace(/\s+/g, '').trim();
+
+        if (!barcode || isSubmittingBarcode) {
+            return;
+        }
+
+        isSubmittingBarcode = true;
+        barcodeInput.value = barcode;
+        setScanStatus('Looking up ' + barcode);
 
         fetch('{{ route('barcode.input') }}', {
             method: 'POST',
@@ -161,14 +235,114 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (data.video_url) {
+            if (data.ok && data.video_url) {
+                setScanStatus('Playing ' + barcode);
                 playVideoImmediately(data.video_url);
+            } else {
+                setScanStatus(data.error ? (data.error + ': ' + barcode) : ('No video for ' + barcode));
             }
         })
-        .catch(() => {});
+        .catch(() => {
+            setScanStatus('Scan lookup failed');
+        })
+        .finally(() => {
+            isSubmittingBarcode = false;
+            scannerBuffer = '';
+            barcodeInput.value = '';
+            focusBarcodeInput();
+        });
+    }
 
-        barcodeInput.value = '';
+    function queueBarcodeSubmit() {
+        clearTimeout(scanTimeout);
+
+        scanTimeout = setTimeout(() => {
+            submitBarcode();
+        }, 120);
+    }
+
+    function queueGlobalScanSubmit() {
+        clearTimeout(scannerBufferTimeout);
+
+        scannerBufferTimeout = setTimeout(() => {
+            if (scannerBuffer.length >= 8) {
+                barcodeInput.value = scannerBuffer;
+                submitBarcode();
+            } else if (scannerBuffer.length > 0) {
+                setScanStatus('Short scan: ' + scannerBuffer);
+                scannerBuffer = '';
+                barcodeInput.value = '';
+            }
+        }, 120);
+    }
+
+    if (video) {
+        video.addEventListener('ended', playNextIdleVideo);
+        video.play().catch(() => {});
+    }
+
+    barcodeForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        submitBarcode();
     });
+
+    barcodeInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            clearTimeout(scanTimeout);
+            submitBarcode();
+        }
+    });
+
+    barcodeInput.addEventListener('input', function () {
+        if (barcodeInput.value.replace(/\s+/g, '').length >= 8) {
+            queueBarcodeSubmit();
+        }
+    });
+
+    barcodeInput.addEventListener('change', submitBarcode);
+
+    document.addEventListener('keydown', function (event) {
+        if (event.ctrlKey || event.altKey || event.metaKey) {
+            return;
+        }
+
+        if (event.key === 'Enter' || event.key === 'Tab') {
+            if (scannerBuffer.length >= 8) {
+                event.preventDefault();
+                clearTimeout(scannerBufferTimeout);
+                barcodeInput.value = scannerBuffer;
+                submitBarcode();
+            }
+
+            return;
+        }
+
+        if (event.key === 'Backspace') {
+            scannerBuffer = scannerBuffer.slice(0, -1);
+            barcodeInput.value = scannerBuffer;
+            return;
+        }
+
+        if (event.key.length !== 1) {
+            return;
+        }
+
+        if (!/[0-9A-Za-z\-]/.test(event.key)) {
+            return;
+        }
+
+        scannerBuffer += event.key;
+        barcodeInput.value = scannerBuffer;
+        setScanStatus('Scanning ' + scannerBuffer);
+        queueGlobalScanSubmit();
+    }, true);
+
+    document.addEventListener('click', focusBarcodeInput);
+    document.addEventListener('fullscreenchange', focusBarcodeInput);
+    window.addEventListener('focus', focusBarcodeInput);
+
+    focusBarcodeInput();
 
     // Fullscreen once
     setTimeout(() => {

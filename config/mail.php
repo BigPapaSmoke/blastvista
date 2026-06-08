@@ -16,6 +16,8 @@ return [
 
     'default' => env('MAIL_MAILER', 'log'),
 
+    'missing_barcode_report_to' => env('MISSING_BARCODE_REPORT_EMAIL', env('ADMIN_EMAIL')),
+
     /*
     |--------------------------------------------------------------------------
     | Mailer Configurations

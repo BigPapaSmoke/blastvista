@@ -1,0 +1,53 @@
+filename,current_barcode,suggested_barcode,suggestion_type,suggested_from_name,source_file,note
+25gun.mp4,TEMP_25gun,,,,,
+addictedtoloud.mp4,TEMP_addictedtoloud,705108538805,fuzzy,"Addict to Loud",barcodes.csv,"review before import (similarity=0.92)"
+AI.mp4,TEMP_AI,,,,,
+angrypandas.mp4,TEMP_angrypandas,,,,,
+ballerianasball.mp4,TEMP_ballerianasball,,,,,
+bigmomma.mp4,TEMP_bigmomma,,,,,
+bornleaders.mp4,TEMP_bornleaders,,,,,
+bubblegatling.mp4,TEMP_bubblegatling,,,,,
+bulldog.mp4,TEMP_bulldog,,,,,
+burstingboq.mp4,TEMP_burstingboq,,,,,
+chameleon5000.mp4,TEMP_chameleon5000,,,,,
+chaoricincident.mp4,TEMP_chaoricincident,705108555307,fuzzy,"Chactoic Incident",barcodes.csv,"review before import (similarity=0.90)"
+countryroots.mp4,TEMP_countryroots,,,,,
+cracklingsilver.mp4,TEMP_cracklingsilver,,,,,
+dreamcatcher.mp4,TEMP_dreamcatcher,,,,,"exact-name match found but barcode already used in another video"
+drippingdonut.mp4,TEMP_drippingdonut,,,,,
+eyecandymulti.mp4,TEMP_eyecandymulti,8143270157011,fuzzy,"eye Candy",barcodes.csv,"review before import (similarity=0.76)"
+ferriswheel.mp4,TEMP_ferriswheel,,,,,
+fierceroyalty.mp4,TEMP_fierceroyalty,,,,,
+fireoverwater.mp4,TEMP_fireoverwater,,,,,
+frogprince.mp4,TEMP_frogprince,,,,,
+garageband.mp4,TEMP_garageband,,,,,
+genderreveal.mp4,TEMP_genderreveal,,,,,
+ghostfleet.mp4,TEMP_ghostfleet,,,,,
+handheldsnowcone.mp4,TEMP_handheldsnowcone,,,,,
+hiphop.mp4,TEMP_hiphop,,,,,
+huskerdonts.mp4,TEMP_huskerdonts,,,,,
+huskerdos.mp4,TEMP_huskerdos,,,,,
+neonmoon.mp4,TEMP_neonmoon,,,,,"best fuzzy barcode already used in another video"
+oceantheatre.mp4,TEMP_oceantheatre,,,,,
+poopypuppy.mp4,TEMP_poopypuppy,,,,,
+poppinpineapple.mp4,TEMP_poppinpineapple,,,,,
+PORCUPINEPLANET.mp4,TEMP_PORCUPINEPLANET,,,,,
+pullings.mp4,TEMP_pullings,191970111817,fuzzy,"Pulling g's",barcodes.csv,"review before import (similarity=0.94)"
+PurpleRain.mp4,TEMP_PurpleRain,,,,,
+pyrotsumami.mp4,TEMP_pyrotsumami,,,,,"best fuzzy barcode already used in another video"
+roadroamerica.mp4,TEMP_roadroamerica,705108533107,fuzzy,"Road to America",barcodes.csv,"review before import (similarity=0.92)"
+Salute.mp4,TEMP_Salute,,,,,
+shakennotstirred.mp4,TEMP_shakennotstirred,,,,,
+slimeblaster.mp4,TEMP_slimeblaster,,,,,
+"Sorcerers Stone.mp4","TEMP_Sorcerers Stone",191970125418,fuzzy,"Sorcerer Stone",barcodes.csv,"review before import (similarity=0.96)"
+spaceexplorer.mp4,TEMP_spaceexplorer,,,,,
+themartian.mp4,TEMP_themartian,,,,,
+titanstrong.mp4,TEMP_titanstrong,,,,,
+triggerhappy.mp4,TEMP_triggerhappy,,,,,
+trumptastic.mp4,TEMP_trumptastic,,,,,
+trumptrain.mp4,TEMP_trumptrain,,,,,
+tuffandfluffy.mp4,TEMP_tuffandfluffy,,,,,
+usaconqueror.mp4,TEMP_usaconqueror,,,,,
+wafflecone.mp4,TEMP_wafflecone,,,,,
+warriorsrealm.mp4,TEMP_warriorsrealm,191970113811,fuzzy,"Warrior's Releam",barcodes.csv,"review before import (similarity=0.89)"
+zombies.mp4,TEMP_zombies,,,,,"best fuzzy barcode already used in another video"

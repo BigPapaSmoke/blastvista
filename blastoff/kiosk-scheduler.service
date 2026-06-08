@@ -1,0 +1,14 @@
+[Unit]
+Description=BlastVista daily barcode email scheduler
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/blast-vista/Downloads/blastvistafiruman
+ExecStart=/home/blast-vista/Downloads/blastvistafiruman/blastoff/start_scheduler.sh
+Restart=always
+RestartSec=10
+User=blast-vista
+
+[Install]
+WantedBy=multi-user.target

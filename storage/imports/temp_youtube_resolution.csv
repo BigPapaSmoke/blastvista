@@ -1,0 +1,53 @@
+filename,current_barcode,suggested_barcode,match_type,matched_name,note
+25gun.mp4,TEMP_25gun,,,,
+addictedtoloud.mp4,TEMP_addictedtoloud,705108538805,fuzzy,"Addict to Loud",similarity=0.92
+AI.mp4,TEMP_AI,,,,
+angrypandas.mp4,TEMP_angrypandas,705108543403,exact,"Angry Pandas",
+ballerianasball.mp4,TEMP_ballerianasball,705108308507,fuzzy,"Ballerina Ball",similarity=0.93
+bigmomma.mp4,TEMP_bigmomma,,,,
+bornleaders.mp4,TEMP_bornleaders,705108955992,exact,"Born Leaders",
+bubblegatling.mp4,TEMP_bubblegatling,705108955930,exact,"Bubble Gatling",
+bulldog.mp4,TEMP_bulldog,,,,
+burstingboq.mp4,TEMP_burstingboq,,,,
+chameleon5000.mp4,TEMP_chameleon5000,705108555703,fuzzy,"Chameleon 500",similarity=0.96
+chaoricincident.mp4,TEMP_chaoricincident,705108555307,fuzzy,"Chactoic Incident",similarity=0.90
+countryroots.mp4,TEMP_countryroots,705108560301,exact,"Country Roots",
+cracklingsilver.mp4,TEMP_cracklingsilver,,,,
+dreamcatcher.mp4,TEMP_dreamcatcher,705108538508,exact,Dreamcatcher,
+drippingdonut.mp4,TEMP_drippingdonut,705108560202,exact,"Dripping Donut",
+eyecandymulti.mp4,TEMP_eyecandymulti,,,,
+ferriswheel.mp4,TEMP_ferriswheel,02736021116,exact,"Ferris Wheel",
+fierceroyalty.mp4,TEMP_fierceroyalty,705108561001,exact,"Fierce Royalty",
+fireoverwater.mp4,TEMP_fireoverwater,8143270162114,exact,"Fire Over Water",
+frogprince.mp4,TEMP_frogprince,8052531137719,exact,"Frog Prince",
+garageband.mp4,TEMP_garageband,705108559008,exact,"Garage Band",
+genderreveal.mp4,TEMP_genderreveal,705108552504,exact,"Gender Reveal",
+ghostfleet.mp4,TEMP_ghostfleet,705108560103,exact,"Ghost Fleet",
+handheldsnowcone.mp4,TEMP_handheldsnowcone,705108321346,exact,"Hand Held Snowcone",
+hiphop.mp4,TEMP_hiphop,191970116713,exact,"Hip Hop",
+huskerdonts.mp4,TEMP_huskerdonts,851866127680,exact,"Husker Don'ts",
+huskerdos.mp4,TEMP_huskerdos,851866127697,exact,"Husker Do's",
+neonmoon.mp4,TEMP_neonmoon,705108557202,exact,"Neon Moon",
+oceantheatre.mp4,TEMP_oceantheatre,705108602704,exact,"Ocean Theatre",
+poopypuppy.mp4,TEMP_poopypuppy,705108321407,exact,"Poopy Puppy",
+poppinpineapple.mp4,TEMP_poppinpineapple,705108560707,fuzzy,"Poppih Pineapple",similarity=0.93
+PORCUPINEPLANET.mp4,TEMP_PORCUPINEPLANET,705108804962,exact,"Porcupine Planet",
+pullings.mp4,TEMP_pullings,191970111817,fuzzy,"Pulling g's",similarity=0.94
+PurpleRain.mp4,TEMP_PurpleRain,,,,
+pyrotsumami.mp4,TEMP_pyrotsumami,,,,
+roadroamerica.mp4,TEMP_roadroamerica,705108533107,fuzzy,"Road to America",similarity=0.92
+Salute.mp4,TEMP_Salute,,,,
+shakennotstirred.mp4,TEMP_shakennotstirred,705108559206,exact,"Shaken Not Stirred",
+slimeblaster.mp4,TEMP_slimeblaster,851866112631,exact,"Slime Blaster",
+"Sorcerers Stone.mp4","TEMP_Sorcerers Stone",191970125418,fuzzy,"Sorcerer Stone",similarity=0.96
+spaceexplorer.mp4,TEMP_spaceexplorer,705108955978,exact,"Space Explorer",
+themartian.mp4,TEMP_themartian,705108602902,exact,"The Martian",
+titanstrong.mp4,TEMP_titanstrong,705108561100,exact,"Titan Strong",
+triggerhappy.mp4,TEMP_triggerhappy,805253154025,exact,"Trigger Happy",
+trumptastic.mp4,TEMP_trumptastic,851866136514,exact,Trumptastic,
+trumptrain.mp4,TEMP_trumptrain,705108956005,exact,"Trump Train",
+tuffandfluffy.mp4,TEMP_tuffandfluffy,,,,
+usaconqueror.mp4,TEMP_usaconqueror,705108534500,exact,"USA Conqueror",
+wafflecone.mp4,TEMP_wafflecone,514677302188,exact,"Waffle Cone",
+warriorsrealm.mp4,TEMP_warriorsrealm,,,,
+zombies.mp4,TEMP_zombies,02736012183,exact,Zombies,

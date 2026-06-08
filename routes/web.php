@@ -1,9 +1,66 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Http\Controllers\VideoController;
 use App\Models\Video;
+
+$streamBaseUrl = rtrim((string) env('VIDEO_STREAM_BASE_URL', ''), '/');
+
+$buildStreamUrl = static function (string $filename) use ($streamBaseUrl): string {
+    $encodedFilename = rawurlencode(trim($filename));
+
+    if ($streamBaseUrl !== '') {
+        return $streamBaseUrl . '/videos/' . $encodedFilename;
+    }
+
+    return '/storage/videos/' . $encodedFilename;
+};
+
+$normalizeBarcode = static function (?string $value): string {
+    $value = strtoupper(trim((string) $value));
+
+    return preg_replace('/[^A-Z0-9]/', '', $value) ?? '';
+};
+
+$findVideoByBarcode = static function (string $rawBarcode) use ($normalizeBarcode): ?Video {
+    $normalizedBarcode = $normalizeBarcode($rawBarcode);
+
+    if ($normalizedBarcode === '') {
+        return null;
+    }
+
+    $candidateBarcodes = array_values(array_unique(array_filter([
+        $rawBarcode,
+        trim($rawBarcode),
+        $normalizedBarcode,
+        ltrim($normalizedBarcode, '0'),
+        str_pad($normalizedBarcode, 12, '0', STR_PAD_LEFT),
+    ], static fn (string $value): bool => $value !== '')));
+
+    $video = Video::query()
+        ->whereIn('barcode', $candidateBarcodes)
+        ->first();
+
+    if ($video) {
+        return $video;
+    }
+
+    return Video::query()
+        ->whereNotNull('barcode')
+        ->get()
+        ->first(static function (Video $video) use ($normalizeBarcode, $normalizedBarcode): bool {
+            $storedBarcode = $normalizeBarcode($video->barcode);
+
+            if ($storedBarcode === '') {
+                return false;
+            }
+
+            return $storedBarcode === $normalizedBarcode
+                || ltrim($storedBarcode, '0') === ltrim($normalizedBarcode, '0');
+        });
+};
 
 /*
 |--------------------------------------------------------------------------
@@ -13,16 +70,15 @@ use App\Models\Video;
 | Videos are streamed directly from the VPS (Nginx), not Laravel.
 */
 
-Route::get('/', function () {
+Route::get('/', function () use ($buildStreamUrl) {
 
     $videos = Video::where('is_favorite', true)
         ->orderBy('created_at', 'desc')
+        ->orderBy('id', 'desc')
         ->limit(50)
         ->get()
-        ->map(function ($video) {
-            // Centralized streaming URL (VPS-hosted videos)
-            $video->stream_url =
-                'http://89.40.11.5/videos/' . rawurlencode(trim($video->filename));
+        ->map(function ($video) use ($buildStreamUrl) {
+            $video->stream_url = $buildStreamUrl($video->filename);
             return $video;
         });
 
@@ -57,23 +113,41 @@ Route::middleware([
 | No redirects. No page reloads.
 */
 
-Route::post('/barcode', function (Request $request) {
+Route::post('/barcode', function (Request $request) use ($buildStreamUrl, $findVideoByBarcode, $normalizeBarcode) {
 
-    $barcode = trim($request->input('barcode'));
+    $barcode = trim((string) $request->input('barcode'));
 
     if (!$barcode) {
-        return response()->json(['error' => 'Empty barcode'], 400);
+        return response()->json([
+            'ok' => false,
+            'error' => 'Empty barcode',
+        ]);
     }
 
-    $video = Video::where('barcode', $barcode)->first();
+    $video = $findVideoByBarcode($barcode);
 
     if (!$video) {
-        return response()->json(['error' => 'Video not found'], 404);
+        Storage::disk('local')->append('reports/missing_scans.jsonl', json_encode([
+            'timestamp' => now()->toIso8601String(),
+            'raw_barcode' => $barcode,
+            'normalized_barcode' => $normalizeBarcode($barcode),
+            'ip' => $request->ip(),
+            'user_agent' => (string) $request->userAgent(),
+        ], JSON_UNESCAPED_SLASHES));
+
+        return response()->json([
+            'ok' => false,
+            'error' => 'Video not found',
+            'scanned_barcode' => $barcode,
+            'normalized_barcode' => $normalizeBarcode($barcode),
+        ]);
     }
 
     return response()->json([
-        'video_url' =>
-            'http://89.40.11.5/videos/' . rawurlencode(trim($video->filename))
+        'ok' => true,
+        'video_url' => $buildStreamUrl($video->filename),
+        'matched_barcode' => $video->barcode,
+        'filename' => $video->filename,
     ]);
 
 })->name('barcode.input');

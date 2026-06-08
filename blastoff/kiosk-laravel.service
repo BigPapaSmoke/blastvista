@@ -1,0 +1,13 @@
+[Unit]
+Description=BlastVista Laravel app server
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Downloads/blastvistafiruman
+Environment=TAKEOVER_PORT_IF_IN_USE=1
+ExecStart=%h/Downloads/blastvistafiruman/blastoff/start_laravel.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

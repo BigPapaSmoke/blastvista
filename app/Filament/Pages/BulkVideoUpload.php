@@ -2,21 +2,22 @@
 
 namespace App\Filament\Pages;
 
+use BackedEnum;
 use App\Models\Video;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class BulkVideoUpload extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cloud-arrow-up';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cloud-arrow-up';
     
     protected static ?string $navigationLabel = 'Bulk Upload Videos';
     
@@ -24,7 +25,7 @@ class BulkVideoUpload extends Page implements HasForms
     
     protected static ?int $navigationSort = 1;
     
-    protected static string $view = 'filament.pages.bulk-video-upload';
+    protected string $view = 'filament.pages.bulk-video-upload';
     
     public ?array $data = [];
     
@@ -33,9 +34,9 @@ class BulkVideoUpload extends Page implements HasForms
         $this->form->fill();
     }
     
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([
                 Section::make('Important: UPC Barcodes Required')
                     ->description('Each video must be linked to its product UPC barcode')

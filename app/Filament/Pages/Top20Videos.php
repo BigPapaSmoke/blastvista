@@ -3,6 +3,7 @@
 
 namespace App\Filament\Pages;
 
+use BackedEnum;
 use App\Traits\FetchesFavoriteVideos;
 use Filament\Pages\Page;
 use Filament\Tables;
@@ -13,9 +14,9 @@ class Top20Videos extends Page implements Tables\Contracts\HasTable
 {
     use InteractsWithTable, FetchesFavoriteVideos;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?int $navigationSort = 2; // Set a higher sort value to place it at the bottom
-    protected static string $view = 'filament.pages.top-20-videos';
+    protected string $view = 'filament.pages.top-20-videos';
 
     protected function getTableQuery(): Builder
     {

@@ -13,6 +13,7 @@ trait FetchesFavoriteVideos
         return Video::query()
                     ->where('is_favorite', true)
                     ->orderBy('created_at', 'desc')
+                    ->orderBy('id', 'desc')
                     ->limit(50);
     }
 }

@@ -1,0 +1,22 @@
+rows_read=282
+barcode_keys=244
+matched=227
+ambiguous=17
+conflicts=0
+AMBIGUOUS key=28shotfinale => 28 shot finale.mp4 | 28ShotFinale.mp4
+AMBIGUOUS key=batterup => BatterUp.mp4 | batter up.mp4 | batterup.mp4
+AMBIGUOUS key=civilwar => CivilWar.mp4 | civil war.mp4
+AMBIGUOUS key=crazyexcitingonsteroids => CrazyExcitingOnSteroids.mp4 | crazy exciting on steroids.mp4 | crazyexcitingonsteroids.mp4
+AMBIGUOUS key=foldsofhonor => FoldsOfHonor.mp4 | folds of honor.mp4
+AMBIGUOUS key=loyaltonone => LoyalToNone.mp4 | loyal to none.mp4
+AMBIGUOUS key=maddoctor => MadDoctor.mp4 | mad doctor.mp4
+AMBIGUOUS key=pyrogal => PyroGal.mp4 | pyro gal.mp4 | pyrogal.mp4
+AMBIGUOUS key=rainbow => Rainbow.mp4 | rainbow.mp4
+AMBIGUOUS key=secondamendment => SecondAmendment.mp4 | second amendment.mp4
+AMBIGUOUS key=skyshooter => SkyShooter.mp4 | sky shooter.mp4
+AMBIGUOUS key=triggerhappy => Trigger Happy.mp4 | trigger happy.mp4 | triggerhappy.mp4
+AMBIGUOUS key=b2bomber => b 2 bomber.mp4 | b-2 bomber.mp4
+AMBIGUOUS key=dreamcatcher => dream catcher.mp4 | dreamcatcher.mp4
+AMBIGUOUS key=mammothsunring => MammothSunRing.mp4 | mammoth sun ring.mp4
+AMBIGUOUS key=outlawbullets => outlaw bullets .mp4 | outlaw bullets.mp4
+AMBIGUOUS key=roadrage => RoadRage.mp4 | road rage.mp4 | roadrage.mp4

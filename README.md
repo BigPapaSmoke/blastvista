@@ -52,6 +52,30 @@ BlastVista is a Laravel-powered kiosk application for movie loops, barcode-trigg
   - `blastoff/start_chromium_fullscreen.sh` launches Firefox/Chromium in kiosk mode pointing at the idle loop (override the URL with an argument if needed).
   - `blastoff/start_chromium.sh` opens the first available supported browser without forcing fullscreen.
 
+## Kiosk Browser Auto-Restart
+
+To keep the kiosk display alive after browser crashes, install the user service:
+
+1. Copy both unit files to your user systemd directory:
+
+	mkdir -p ~/.config/systemd/user
+	cp blastoff/kiosk-laravel.service ~/.config/systemd/user/kiosk-laravel.service
+	cp blastoff/kiosk-browser.service ~/.config/systemd/user/kiosk-browser.service
+
+2. Reload user units and enable the service:
+
+	systemctl --user daemon-reload
+	systemctl --user enable --now kiosk-laravel.service kiosk-browser.service
+
+3. Check status/logs:
+
+	systemctl --user status kiosk-laravel.service
+	systemctl --user status kiosk-browser.service
+	journalctl --user -u kiosk-laravel.service -f
+	journalctl --user -u kiosk-browser.service -f
+
+If your project path is different, update `WorkingDirectory` and `ExecStart` in `~/.config/systemd/user/kiosk-browser.service` before enabling.
+
 ## Barcode Workflow
 
 - Barcode scans post to `/barcode` and resolve to a `Video` record by its `barcode` column.

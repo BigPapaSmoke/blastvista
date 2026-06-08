@@ -76,16 +76,52 @@
    - Login with: `admin@admin.com` / `password`
    - Verify admin panel works
 
-10. **Setup auto-start (optional but recommended):**
-    Create a startup script at `/home/[username]/start-kiosk.sh`:
-    ```bash
-    #!/bin/bash
-    cd /home/[username]/blastvistafiruman
-    php artisan serve --host=0.0.0.0 --port=8000 &
-    sleep 5
-    chromium-browser --kiosk --app=http://localhost:8000
-    ```
-    Make it executable: `chmod +x start-kiosk.sh`
+10. **Setup browser auto-restart (recommended):**
+   Install user systemd services so Laravel and Chromium both restart if they crash.
+
+   ```bash
+   mkdir -p ~/.config/systemd/user
+   cp /home/[username]/blastvistafiruman/blastoff/kiosk-laravel.service ~/.config/systemd/user/kiosk-laravel.service
+   cp /home/[username]/blastvistafiruman/blastoff/kiosk-browser.service ~/.config/systemd/user/kiosk-browser.service
+   sed -i "s#%h/Downloads/blastvistafiruman#/home/[username]/blastvistafiruman#g" ~/.config/systemd/user/kiosk-laravel.service
+   sed -i "s#%h/Downloads/blastvistafiruman#/home/[username]/blastvistafiruman#g" ~/.config/systemd/user/kiosk-browser.service
+   systemctl --user daemon-reload
+   systemctl --user enable --now kiosk-laravel.service kiosk-browser.service
+   systemctl --user status kiosk-laravel.service
+   systemctl --user status kiosk-browser.service
+   ```
+
+   Notes:
+   - If your distro uses a different display, change `DISPLAY=:0` in the service file.
+   - Keep `Environment=RUN_FOREGROUND=1` so systemd can monitor and restart the browser process correctly.
+   - Browser service is already configured to start after `kiosk-laravel.service`.
+
+11. **Setup the daily missing-barcode email:**
+      Choose one of these options so Laravel's scheduler runs all the time.
+
+      **Option A: systemd service + timer**
+      - Copy `blastoff/kiosk-scheduler.service` to `/etc/systemd/system/kiosk-scheduler.service`
+      - Copy `blastoff/kiosk-scheduler.timer` to `/etc/systemd/system/kiosk-scheduler.timer`
+      - Replace `[username]` with your Linux username in the service file
+      - Run:
+         ```bash
+         sudo systemctl daemon-reload
+         sudo systemctl enable --now kiosk-scheduler.timer
+         sudo systemctl status kiosk-scheduler.timer
+         ```
+
+      **Option B: cron**
+      Add this line with `crontab -e`:
+      ```bash
+      * * * * * cd /home/[username]/blastvistafiruman && php artisan schedule:run >> storage/logs/scheduler.log 2>&1
+      ```
+
+      **Recipient address**
+      Set one of these in `.env`:
+      ```
+      MISSING_BARCODE_REPORT_EMAIL=you@example.com
+      ADMIN_EMAIL=you@example.com
+      ```
 
 ---
 
@@ -126,10 +162,9 @@ For each of the 10+ units:
    php artisan tinker --execute="\$user = \App\Models\User::create(['name' => 'Admin', 'email' => 'admin@admin.com', 'password' => bcrypt('password'), 'email_verified_at' => now()]); echo 'User created';"
    ```
 
-5. **Start the application:**
+5. **Start the application and browser services:**
    ```bash
-   php artisan serve --host=0.0.0.0 --port=8000 &
-   chromium-browser --kiosk --app=http://localhost:8000
+   systemctl --user start kiosk-laravel.service kiosk-browser.service
    ```
 
 6. **Test:** Videos should auto-play, admin link should work
@@ -171,7 +206,8 @@ php artisan serve --host=0.0.0.0 --port=8000
 - **Database is local** - SQLite file in `database/database.sqlite`
 - **Admin credentials** are in `.env` file if you forget: `admin@admin.com` / `password`
 - **Different IPs don't matter** - each runs on localhost (127.0.0.1)
-- **Browser kiosk mode** - Use `chromium-browser --kiosk --app=http://localhost:8000` to launch fullscreen
+- **Browser kiosk mode** - Use the `kiosk-browser.service` user unit for auto-restart on crashes
+- **Scheduler required** - The daily missing-barcode email only sends when either the systemd timer or cron job is running
 
 ---
 
@@ -179,12 +215,12 @@ php artisan serve --host=0.0.0.0 --port=8000
 
 Start application:
 ```bash
-cd /home/[username]/blastvistafiruman && php artisan serve --host=0.0.0.0 --port=8000
+systemctl --user start kiosk-laravel.service
 ```
 
-Start browser in kiosk mode:
+Start browser service in kiosk mode:
 ```bash
-chromium-browser --kiosk --app=http://localhost:8000
+systemctl --user start kiosk-browser.service
 ```
 
 Admin login:

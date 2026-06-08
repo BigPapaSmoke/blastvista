@@ -1,0 +1,18 @@
+[Unit]
+Description=BlastVista kiosk browser
+After=graphical-session.target
+Wants=graphical-session.target
+After=kiosk-laravel.service
+Wants=kiosk-laravel.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Downloads/blastvistafiruman
+Environment=DISPLAY=:0
+Environment=RUN_FOREGROUND=1
+ExecStart=%h/Downloads/blastvistafiruman/blastoff/start_chromium_fullscreen.sh http://127.0.0.1:8000/
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
