@@ -1,0 +1,10 @@
+[Unit]
+Description=BlastVista nightly video replication from TheMan
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/blast-vista/Downloads/blastvistafiruman
+ExecStart=/home/blast-vista/Downloads/blastvistafiruman/blastoff/sync_videos_to_nodes.sh
+User=blast-vista

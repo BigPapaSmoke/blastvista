@@ -1,0 +1,11 @@
+[Unit]
+Description=Run BlastVista video replication nightly
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+RandomizedDelaySec=10m
+Unit=kiosk-video-replication.service
+
+[Install]
+WantedBy=timers.target

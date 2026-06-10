@@ -1,0 +1,5 @@
+# Fill this file with client nodes for nightly replication.
+# Copy line format from blastoff/video_replication_hosts.example.txt.
+#
+# Example:
+# blast-vista@10.10.0.12 /home/blast-vista/Downloads/blastvistafiruman

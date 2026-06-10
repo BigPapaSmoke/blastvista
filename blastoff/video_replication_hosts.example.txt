@@ -1,0 +1,8 @@
+# One target per line.
+# Format:
+# user@hostname_or_ip [/absolute/path/to/project/root]
+#
+# If project root is omitted, the local project root path is used.
+# Example:
+# blast-vista@10.10.0.12 /home/blast-vista/Downloads/blastvistafiruman
+# blast-vista@10.10.0.13 /home/blast-vista/Downloads/blastvistafiruman

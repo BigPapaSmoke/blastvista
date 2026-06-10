@@ -76,6 +76,50 @@ To keep the kiosk display alive after browser crashes, install the user service:
 
 If your project path is different, update `WorkingDirectory` and `ExecStart` in `~/.config/systemd/user/kiosk-browser.service` before enabling.
 
+## Nightly Video Replication (TheMan -> Client Nodes)
+
+This project now includes a safe nightly replication path that pushes newly added videos from TheMan to all client nodes.
+
+Files added for replication:
+
+- `blastoff/sync_videos_to_nodes.sh`
+- `blastoff/video_replication_hosts.txt`
+- `blastoff/video_replication_hosts.example.txt`
+- `blastoff/kiosk-video-replication.service`
+- `blastoff/kiosk-video-replication.timer`
+
+### 1) Configure client host list on TheMan
+
+Edit `blastoff/video_replication_hosts.txt` and add one target per line:
+
+	user@host-or-ip /absolute/path/to/project/root
+
+Example:
+
+	blast-vista@10.10.0.12 /home/blast-vista/Downloads/blastvistafiruman
+	blast-vista@10.10.0.13 /home/blast-vista/Downloads/blastvistafiruman
+
+### 2) Verify SSH trust from TheMan to each client
+
+Ensure key-based SSH works without prompts for each node in the host list.
+
+### 3) Install and enable nightly systemd timer
+
+	sudo cp blastoff/kiosk-video-replication.service /etc/systemd/system/
+	sudo cp blastoff/kiosk-video-replication.timer /etc/systemd/system/
+	sudo systemctl daemon-reload
+	sudo systemctl enable --now kiosk-video-replication.timer
+
+### 4) Confirm timer and run on demand
+
+	systemctl status kiosk-video-replication.timer
+	sudo systemctl start kiosk-video-replication.service
+	journalctl -u kiosk-video-replication.service -n 200 --no-pager
+
+By default the timer runs nightly at 02:30 with a small randomized delay. The replication script only runs on TheMan (`NODE_ROLE=man` or hostname match to `MAN_HOSTNAME`).
+
+On each client node, after files are copied, the script runs `php artisan videos:sync` to register new files in the local database.
+
 ## Barcode Workflow
 
 - Barcode scans post to `/barcode` and resolve to a `Video` record by its `barcode` column.

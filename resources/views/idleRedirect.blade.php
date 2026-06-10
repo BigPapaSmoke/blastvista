@@ -51,17 +51,17 @@
 
         .scanner-panel {
             position: fixed;
-            top: max(12px, env(safe-area-inset-top));
+            top: max(6px, env(safe-area-inset-top));
             left: 50%;
             transform: translateX(-50%);
             z-index: 20;
-            width: min(760px, calc(100vw - 24px));
+            width: min(500px, calc(100vw - 20px));
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 5px;
             align-items: center;
-            padding: 12px;
-            border-radius: 14px;
+            padding: 6px;
+            border-radius: 9px;
             background: rgba(0, 0, 0, 0.68);
             backdrop-filter: blur(6px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
@@ -69,9 +69,9 @@
 
         .scanner-label {
             color: #fff;
-            font-size: clamp(14px, 2vw, 20px);
+            font-size: clamp(11px, 1.4vw, 14px);
             font-weight: 700;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.03em;
             text-transform: uppercase;
         }
 
@@ -98,6 +98,14 @@
             box-sizing: border-box;
         }
 
+        #barcodeInput {
+            width: 46%;
+            padding: 7px 8px;
+            font-size: clamp(10px, 1.3vw, 15px);
+            margin: 0 auto;
+            display: block;
+        }
+
         input[type="text"]:focus {
             outline: none;
             border-color: #7dd3fc;
@@ -107,11 +115,11 @@
         #scanStatus {
             width: 100%;
             color: #fff;
-            font-size: clamp(15px, 2vw, 20px);
+            font-size: clamp(11px, 1.3vw, 14px);
             background: rgba(255, 255, 255, 0.12);
-            padding: 10px 12px;
-            border-radius: 10px;
-            min-height: 24px;
+            padding: 5px 7px;
+            border-radius: 7px;
+            min-height: 16px;
             text-align: center;
             box-sizing: border-box;
         }
@@ -183,6 +191,7 @@
     let isSubmittingBarcode = false;
     let scannerBuffer = '';
     let scannerBufferTimeout = null;
+    let audioContext = null;
 
     function playIdleVideo(index) {
         source.src = videos[index];
@@ -214,6 +223,45 @@
         scanStatus.textContent = message;
     }
 
+    function playErrorSound() {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioCtx) {
+            return;
+        }
+
+        if (!audioContext) {
+            audioContext = new AudioCtx();
+        }
+
+        if (audioContext.state === 'suspended') {
+            audioContext.resume().catch(() => {});
+        }
+
+        const now = audioContext.currentTime;
+        const gain = audioContext.createGain();
+        gain.connect(audioContext.destination);
+
+        // Longer, higher-pitch double-tone beep for missing barcode feedback.
+        const toneA = audioContext.createOscillator();
+        toneA.type = 'square';
+        toneA.frequency.setValueAtTime(520, now);
+        toneA.connect(gain);
+        toneA.start(now);
+        toneA.stop(now + 0.14);
+
+        const toneB = audioContext.createOscillator();
+        toneB.type = 'square';
+        toneB.frequency.setValueAtTime(440, now + 0.16);
+        toneB.connect(gain);
+        toneB.start(now + 0.16);
+        toneB.stop(now + 0.32);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(0.2, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+    }
+
     function submitBarcode() {
         const barcode = barcodeInput.value.replace(/\s+/g, '').trim();
 
@@ -239,6 +287,7 @@
                 setScanStatus('Playing ' + barcode);
                 playVideoImmediately(data.video_url);
             } else {
+                playErrorSound();
                 setScanStatus(data.error ? (data.error + ': ' + barcode) : ('No video for ' + barcode));
             }
         })
