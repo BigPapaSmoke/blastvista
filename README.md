@@ -120,6 +120,16 @@ By default the timer runs nightly at 02:30 with a small randomized delay. The re
 
 On each client node, after files are copied, the script runs `php artisan videos:sync` to register new files in the local database.
 
+## Golden Image Security Hardening
+
+For cloning to many kiosk machines, use the runtime hardening guide:
+
+- `KIOSK_HARDENING_CHECKLIST.md`
+
+Use this post-clone check script on each machine:
+
+	bash blastoff/post_clone_safety_check.sh
+
 ## Barcode Workflow
 
 - Barcode scans post to `/barcode` and resolve to a `Video` record by its `barcode` column.
